@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Adrenal Chemical Shift MRI Calculator</title>
+
+  <style>
+    /* ─────────────────────────────────────────────
+       Design tokens
+       ─────────────────────────────────────────── */
+    :root {
+      --navy:        #1a2b5e;   /* SNUBH navy */
+      --navy-light:  #2c4393;
+      --navy-bg:     #eef1f9;
+      --green:       #0a7a3f;
+      --green-bg:    #e6f4ec;
+      --red:         #b3261e;
+      --red-bg:      #fcecea;
+      --gray-50:     #f7f8fa;
+      --gray-100:    #eef0f4;
+      --gray-300:    #bec4cf;
+      --gray-500:    #6b7280;
+      --gray-700:    #374151;
+      --gray-900:    #111827;
+      --radius:      12px;
+      --shadow:      0 2px 12px rgba(0,0,0,.10);
+      --font:        -apple-system, "Pretendard", "Apple SD Gothic Neo",
+                     "Segoe UI", system-ui, sans-serif;
+    }
+
+    /* ─── Base ─── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font);
+      background: var(--gray-50);
+      color: var(--gray-900);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 32px 16px 64px;
+    }
+
+    /* ─── Header ─── */
+    header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    header .badge {
+      display: inline-block;
+      background: var(--navy);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+    }
+    header h1 {
+      font-size: clamp(20px, 4vw, 28px);
+      font-weight: 700;
+      color: var(--navy);
+      line-height: 1.25;
+    }
+    header p.subtitle {
+      margin-top: 6px;
+      font-size: 13px;
+      color: var(--gray-500);
+      font-weight: 400;
+    }
+
+    /* ─── Card ─── */
+    .card {
+      background: #fff;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 32px 28px;
+      width: 100%;
+      max-width: 480px;
+    }
+
+    /* ─── Form ─── */
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .field label {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--gray-700);
+    }
+    .field label span.ko {
+      font-weight: 400;
+      color: var(--gray-500);
+      font-size: 12px;
+      margin-left: 4px;
+    }
+    .field input[type="number"] {
+      width: 100%;
+      padding: 14px 16px;
+      font-size: 20px;
+      font-family: var(--font);
+      font-weight: 500;
+      border: 2px solid var(--gray-300);
+      border-radius: 8px;
+      color: var(--gray-900);
+      background: #fff;
+      appearance: textfield;
+      -moz-appearance: textfield;
+      transition: border-color .15s;
+      outline: none;
+    }
+    .field input[type="number"]::-webkit-outer-spin-button,
+    .field input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+    .field input[type="number"]:focus  { border-color: var(--navy); }
+    .field input[type="number"].error  { border-color: var(--red); }
+
+    /* ─── Error message ─── */
+    .error-msg {
+      display: none;
+      font-size: 12px;
+      color: var(--red);
+      margin-top: -6px;
+    }
+    .error-msg.visible { display: block; }
+
+    /* ─── Buttons ─── */
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+    }
+    .btn {
+      flex: 1;
+      padding: 14px 0;
+      font-size: 15px;
+      font-family: var(--font);
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background .15s, opacity .15s;
+    }
+    .btn-primary {
+      background: var(--navy);
+      color: #fff;
+    }
+    .btn-primary:hover  { background: var(--navy-light); }
+    .btn-primary:active { opacity: .85; }
+
+    .btn-secondary {
+      background: var(--gray-100);
+      color: var(--gray-700);
+      border: 2px solid var(--gray-300);
+    }
+    .btn-secondary:hover  { background: var(--gray-100); border-color: var(--gray-500); }
+    .btn-secondary:active { opacity: .80; }
+
+    /* ─── Divider ─── */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--gray-100);
+      margin: 24px 0;
+    }
+
+    /* ─── Result box ─── */
+    #result-section {
+      display: none;        /* hidden until first calculation */
+      animation: fadeIn .25s ease;
+    }
+    #result-section.visible { display: block; }
+    #result-section.stale   { opacity: .45; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      color: var(--gray-500);
+      margin-bottom: 8px;
+    }
+
+    .sii-display {
+      font-size: clamp(36px, 10vw, 52px);
+      font-weight: 700;
+      color: var(--navy);
+      line-height: 1;
+      margin-bottom: 16px;
+    }
+
+    .verdict-box {
+      border-radius: 10px;
+      padding: 18px 20px;
+      margin-bottom: 10px;
+    }
+    .verdict-box.adenoma {
+      background: var(--green-bg);
+      border: 2px solid var(--green);
+    }
+    .verdict-box.no-adenoma {
+      background: var(--red-bg);
+      border: 2px solid var(--red);
+    }
+    .verdict-icon {
+      font-size: 22px;
+      margin-bottom: 4px;
+    }
+    .verdict-text {
+      font-size: clamp(17px, 4vw, 22px);
+      font-weight: 700;
+      line-height: 1.2;
+    }
+    .verdict-box.adenoma   .verdict-text { color: var(--green); }
+    .verdict-box.no-adenoma .verdict-text { color: var(--red); }
+
+    .cutoff-note {
+      font-size: 11.5px;
+      color: var(--gray-500);
+      margin-top: 8px;
+    }
+
+    /* ─── Footer ─── */
+    footer {
+      margin-top: 36px;
+      width: 100%;
+      max-width: 480px;
+      text-align: left;
+    }
+    footer .ref {
+      font-size: 11px;
+      color: var(--gray-500);
+      line-height: 1.6;
+      border-left: 3px solid var(--navy-bg);
+      padding-left: 10px;
+    }
+    footer .dept {
+      margin-top: 10px;
+      font-size: 11px;
+      color: var(--gray-500);
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════
+     HEADER
+════════════════════════════════════════════ -->
+<header>
+  <div class="badge">Radiology · Clinical Tool</div>
+  <h1>Adrenal Chemical Shift MRI Calculator</h1>
+  <p class="subtitle">In-phase / Opposed-phase Signal Intensity Index</p>
+</header>
+
+<!-- ════════════════════════════════════════════
+     MAIN CARD
+════════════════════════════════════════════ -->
+<main class="card" role="main">
+
+  <!-- Input: In-phase SI -->
+  <div class="field">
+    <label for="ip">
+      In-phase Signal Intensity
+      <span class="ko">(동위상)</span>
+    </label>
+    <input
+      id="ip"
+      type="number"
+      inputmode="decimal"
+      min="0"
+      step="any"
+      placeholder="e.g.  520"
+      autocomplete="off"
+      aria-describedby="ip-err"
+    />
+    <span class="error-msg" id="ip-err" role="alert"></span>
+  </div>
+
+  <!-- Input: Opposed-phase SI -->
+  <div class="field">
+    <label for="op">
+      Opposed-phase Signal Intensity
+      <span class="ko">(반위상)</span>
+    </label>
+    <input
+      id="op"
+      type="number"
+      inputmode="decimal"
+      min="0"
+      step="any"
+      placeholder="e.g.  380"
+      autocomplete="off"
+      aria-describedby="op-err"
+    />
+    <span class="error-msg" id="op-err" role="alert"></span>
+  </div>
+
+  <!-- Buttons -->
+  <div class="btn-row">
+    <button class="btn btn-primary"    id="btn-calc"  type="button">Calculate</button>
+    <button class="btn btn-secondary"  id="btn-reset" type="button">Reset</button>
+  </div>
+
+  <hr class="divider" />
+
+  <!-- Result Section (hidden until Calculate is pressed) -->
+  <section id="result-section" aria-live="polite">
+
+    <p class="result-label">Signal Intensity Index (SII)</p>
+    <div class="sii-display" id="sii-value">—</div>
+
+    <div class="verdict-box" id="verdict-box">
+      <div class="verdict-icon" id="verdict-icon"></div>
+      <div class="verdict-text" id="verdict-text"></div>
+    </div>
+
+    <p class="cutoff-note" id="cutoff-note"></p>
+
+  </section>
+
+</main>
+
+<!-- ════════════════════════════════════════════
+     FOOTER
+════════════════════════════════════════════ -->
+<footer>
+  <p class="ref">
+    <strong>Reference:</strong> Signal intensity index = 100 &times; (in-phase SI &minus; opposed-phase SI) / in-phase SI.<br>
+    A value &gt; 16.5% is compatible with lipid-rich adrenal adenoma on chemical shift MRI.
+  </p>
+  <p class="dept">Department of Radiology, Seoul National University Bundang Hospital</p>
+</footer>
+
+
+<!-- ════════════════════════════════════════════
+     JAVASCRIPT
+     Formula  : SII (%) = 100 × (IP − OP) / IP
+     Cutoff   : SII > 16.5 % → Compatible with adenoma
+                SII ≤ 16.5 % → No adenoma (includes negative SII)
+     Reference: Haider MA et al. AJR 2004; Israel GM et al. Radiology 2004
+════════════════════════════════════════════ -->
+<script>
+(function () {
+  'use strict';
+
+  /* ── DOM refs ── */
+  const ipInput    = document.getElementById('ip');
+  const opInput    = document.getElementById('op');
+  const btnCalc    = document.getElementById('btn-calc');
+  const btnReset   = document.getElementById('btn-reset');
+  const resultSec  = document.getElementById('result-section');
+  const siiValue   = document.getElementById('sii-value');
+  const verdictBox = document.getElementById('verdict-box');
+  const verdictIcon= document.getElementById('verdict-icon');
+  const verdictText= document.getElementById('verdict-text');
+  const cutoffNote = document.getElementById('cutoff-note');
+  const ipErr      = document.getElementById('ip-err');
+  const opErr      = document.getElementById('op-err');
+
+  /* ── SII cutoff (%) ── */
+  const CUTOFF = 16.5;
+
+  /* ── Helpers ── */
+  function showError(input, errEl, msg) {
+    input.classList.add('error');
+    errEl.textContent = msg;
+    errEl.classList.add('visible');
+  }
+
+  function clearError(input, errEl) {
+    input.classList.remove('error');
+    errEl.textContent = '';
+    errEl.classList.remove('visible');
+  }
+
+  function clearAllErrors() {
+    clearError(ipInput, ipErr);
+    clearError(opInput, opErr);
+  }
+
+  /* ── Stale result when user edits inputs ── */
+  function markStale() {
+    if (resultSec.classList.contains('visible')) {
+      resultSec.classList.add('stale');
+    }
+  }
+  ipInput.addEventListener('input', markStale);
+  opInput.addEventListener('input', markStale);
+
+  /* ── Enter key triggers Calculate ── */
+  [ipInput, opInput].forEach(function (el) {
+    el.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') btnCalc.click();
+    });
+  });
+
+  /* ── Calculate ── */
+  btnCalc.addEventListener('click', function () {
+    clearAllErrors();
+
+    var ipRaw = ipInput.value.trim();
+    var opRaw = opInput.value.trim();
+    var valid  = true;
+
+    /* Validate: non-empty, numeric */
+    if (ipRaw === '' || isNaN(Number(ipRaw))) {
+      showError(ipInput, ipErr, 'Please enter a valid numeric value.');
+      valid = false;
+    }
+    if (opRaw === '' || isNaN(Number(opRaw))) {
+      showError(opInput, opErr, 'Please enter a valid numeric value.');
+      valid = false;
+    }
+    if (!valid) return;
+
+    var ip = parseFloat(ipRaw);
+    var op = parseFloat(opRaw);
+
+    /* Validate: non-negative */
+    if (ip < 0) {
+      showError(ipInput, ipErr, 'Value must be 0 or greater.');
+      valid = false;
+    }
+    if (op < 0) {
+      showError(opInput, opErr, 'Value must be 0 or greater.');
+      valid = false;
+    }
+    if (!valid) return;
+
+    /* Validate: in-phase must be > 0 (division guard) */
+    if (ip === 0) {
+      showError(ipInput, ipErr, 'In-phase signal intensity must be greater than 0.');
+      return;
+    }
+
+    /* ──────────────────────────────────────────────────
+       Core formula
+       SII (%) = 100 × (IP − OP) / IP
+    ────────────────────────────────────────────────── */
+    var sii = 100 * (ip - op) / ip;
+
+    /* Display SII (2 decimal places) */
+    siiValue.textContent = sii.toFixed(2) + '%';
+
+    /* Verdict */
+    var isAdenoma = sii > CUTOFF;
+
+    verdictBox.className = 'verdict-box ' + (isAdenoma ? 'adenoma' : 'no-adenoma');
+
+    if (isAdenoma) {
+      verdictIcon.textContent = '✔';
+      verdictText.textContent = 'Compatible with adenoma';
+    } else {
+      verdictIcon.textContent = '✖';
+      verdictText.textContent = 'No adenoma';
+    }
+
+    /* Note below verdict box */
+    cutoffNote.textContent =
+      'Cutoff: SII > ' + CUTOFF + '% is compatible with lipid-rich adrenal adenoma.' +
+      (op > ip ? '  (Opposed-phase > In-phase → SII is negative; classified as No adenoma.)' : '');
+
+    /* Show result */
+    resultSec.classList.remove('stale');
+    resultSec.classList.add('visible');
+    /* Re-trigger animation */
+    resultSec.style.animation = 'none';
+    void resultSec.offsetWidth;          /* reflow */
+    resultSec.style.animation = '';
+  });
+
+  /* ── Reset ── */
+  btnReset.addEventListener('click', function () {
+    ipInput.value = '';
+    opInput.value = '';
+    clearAllErrors();
+    resultSec.classList.remove('visible', 'stale');
+    siiValue.textContent   = '—';
+    verdictText.textContent = '';
+    verdictIcon.textContent = '';
+    cutoffNote.textContent  = '';
+    ipInput.focus();
+  });
+
+})();
+</script>
+
+</body>
+</html>
