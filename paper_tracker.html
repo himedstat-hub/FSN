@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Paper Writing Tracker</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #fafaf8;
+    --surface: #ffffff;
+    --border: #d8d5ce;
+    --border-light: #eae8e2;
+    --text: #1a1a18;
+    --text-muted: #6b6860;
+    --text-faint: #9c9a94;
+    --accent: #2c5f8a;
+    --accent-light: #e8f0f7;
+    --yes: #2d6a4f;
+    --yes-bg: #e9f5ee;
+    --no: #7a3e3e;
+    --no-bg: #f5ebe9;
+    --font-serif: Georgia, 'Times New Roman', serif;
+    --font-sans: 'Segoe UI', system-ui, sans-serif;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 0;
+  }
+
+  header .inner {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+  }
+
+  header h1 {
+    font-family: var(--font-serif);
+    font-size: 22px;
+    font-weight: normal;
+    color: var(--text);
+    letter-spacing: 0.01em;
+  }
+
+  header .subtitle {
+    font-size: 12px;
+    color: var(--text-faint);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .main {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 28px 24px;
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 28px;
+    align-items: start;
+  }
+
+  /* ---- FORM PANEL ---- */
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+  }
+
+  .panel-header {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border-light);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .panel-body {
+    padding: 18px;
+  }
+
+  .field {
+    margin-bottom: 14px;
+  }
+
+  .field:last-child { margin-bottom: 0; }
+
+  label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 5px;
+    letter-spacing: 0.03em;
+  }
+
+  input[type="text"],
+  input[type="date"],
+  textarea,
+  select {
+    width: 100%;
+    padding: 7px 10px;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    transition: border-color 0.15s;
+    outline: none;
+  }
+
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--accent);
+    background: #fff;
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 60px;
+    line-height: 1.5;
+  }
+
+  .hint {
+    font-size: 11px;
+    color: var(--text-faint);
+    margin-top: 4px;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    background: var(--surface);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.12s, border-color 0.12s;
+    white-space: nowrap;
+  }
+
+  .btn:hover { background: var(--border-light); }
+
+  .btn-primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    width: 100%;
+    justify-content: center;
+    font-weight: 500;
+  }
+
+  .btn-primary:hover { background: #245077; border-color: #245077; }
+
+  /* ---- RECORDS PANEL ---- */
+  .records-panel { min-width: 0; }
+
+  .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+
+  .toolbar .filter-wrap {
+    flex: 1;
+    min-width: 160px;
+  }
+
+  .toolbar select, .toolbar input {
+    padding: 6px 10px;
+    font-size: 13px;
+  }
+
+  .stats-bar {
+    font-size: 12px;
+    color: var(--text-faint);
+    margin-left: auto;
+    white-space: nowrap;
+  }
+
+  .stats-bar strong {
+    color: var(--text-muted);
+  }
+
+  /* ---- TABLE ---- */
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  thead th {
+    background: #f5f4f0;
+    padding: 9px 12px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border-light);
+    transition: background 0.1s;
+  }
+
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #faf9f6; }
+
+  td {
+    padding: 10px 12px;
+    vertical-align: top;
+  }
+
+  .td-date {
+    white-space: nowrap;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    width: 90px;
+  }
+
+  .td-project {
+    width: 130px;
+    font-weight: 500;
+  }
+
+  .project-tag {
+    display: inline-block;
+    padding: 2px 7px;
+    background: var(--accent-light);
+    color: var(--accent);
+    border-radius: 2px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .td-goal { color: var(--text); }
+  .td-goal .text { margin-bottom: 0; }
+
+  .td-next {
+    color: var(--text-muted);
+    font-size: 12px;
+    font-style: italic;
+    width: 160px;
+  }
+
+  .next-input {
+    width: 100%;
+    padding: 4px 7px;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-style: italic;
+    font-family: var(--font-sans);
+    transition: border-color 0.12s, background 0.12s;
+    outline: none;
+  }
+
+  .next-input:hover {
+    border-color: var(--border);
+    background: var(--bg);
+  }
+
+  .next-input:focus {
+    border-color: var(--accent);
+    background: #fff;
+    font-style: normal;
+    color: var(--text);
+  }
+
+  .td-achieved { width: 80px; text-align: center; }
+
+  .toggle-btn {
+    padding: 4px 10px;
+    border-radius: 12px;
+    border: 1px solid;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    transition: background 0.12s, color 0.12s;
+    font-family: var(--font-sans);
+  }
+
+  .toggle-yes {
+    background: var(--yes-bg);
+    border-color: #a8d5bb;
+    color: var(--yes);
+  }
+
+  .toggle-no {
+    background: var(--no-bg);
+    border-color: #d5b4b4;
+    color: var(--no);
+  }
+
+  .toggle-yes:hover { background: #d4eddf; }
+  .toggle-no:hover { background: #eddbd4; }
+
+  .td-actions { width: 36px; text-align: center; }
+
+  .del-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-faint);
+    font-size: 16px;
+    line-height: 1;
+    padding: 2px 4px;
+    border-radius: 2px;
+    transition: color 0.12s, background 0.12s;
+  }
+
+  .del-btn:hover { color: var(--no); background: var(--no-bg); }
+
+  .empty-state {
+    padding: 48px 24px;
+    text-align: center;
+    color: var(--text-faint);
+    font-style: italic;
+  }
+
+  .empty-state p { margin-bottom: 6px; }
+  .empty-state small { font-size: 12px; }
+
+  /* ---- SUMMARY ROW ---- */
+  .summary-row {
+    background: #f5f4f0;
+    border-top: 1px solid var(--border);
+    padding: 8px 12px;
+    font-size: 12px;
+    color: var(--text-muted);
+    display: flex;
+    gap: 20px;
+  }
+
+  .summary-row span strong { color: var(--text); }
+
+  /* ---- FLASH ---- */
+  .flash {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--text);
+    color: #fff;
+    padding: 10px 16px;
+    border-radius: 4px;
+    font-size: 13px;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.2s, transform 0.2s;
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  .flash.show { opacity: 1; transform: translateY(0); }
+
+  @media (max-width: 700px) {
+    .main { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="inner">
+    <h1>Paper Writing Tracker</h1>
+    <span class="subtitle">Session Log</span>
+  </div>
+</header>
+
+<div class="main">
+
+  <!-- LEFT: Add Entry Form -->
+  <aside>
+    <div class="panel">
+      <div class="panel-header">New Session</div>
+      <div class="panel-body">
+        <div class="field">
+          <label for="f-date">Date</label>
+          <input type="date" id="f-date">
+        </div>
+        <div class="field">
+          <label for="f-project">Project / Manuscript</label>
+          <input type="text" id="f-project" placeholder="e.g. Nature Methods paper" list="project-list" autocomplete="off">
+          <datalist id="project-list"></datalist>
+        </div>
+        <div class="field">
+          <label for="f-goal">Today's Goal</label>
+          <textarea id="f-goal" rows="3" placeholder="What will you write or revise today?"></textarea>
+          <div class="hint" id="carry-hint" style="display:none">↑ Carried from last session's next plan</div>
+        </div>
+        <div class="field" style="margin-bottom:18px">
+          <label for="f-next">Next Session Plan <span style="font-weight:400;color:var(--text-faint)">(optional)</span></label>
+          <textarea id="f-next" rows="2" placeholder="What comes after today?"></textarea>
+        </div>
+        <button class="btn btn-primary" onclick="addEntry()">Add Session Entry</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- RIGHT: Records -->
+  <section class="records-panel">
+    <div class="toolbar">
+      <div class="filter-wrap">
+        <select id="filter-project" onchange="renderTable()">
+          <option value="">All projects</option>
+        </select>
+      </div>
+      <button class="btn" onclick="exportCSV()">Export CSV</button>
+      <div class="stats-bar" id="stats-bar"></div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Project</th>
+            <th>Goal</th>
+            <th>Next Plan</th>
+            <th>Done?</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+      <div id="empty-state" class="empty-state" style="display:none">
+        <p>No sessions recorded yet.</p>
+        <small>Add your first entry using the form on the left.</small>
+      </div>
+      <div class="summary-row" id="summary-row" style="display:none"></div>
+    </div>
+  </section>
+
+</div>
+
+<div class="flash" id="flash"></div>
+
+<script>
+const STORAGE_KEY = 'paper_tracker_v1';
+
+// ---- Storage ----
+function load() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+  catch { return []; }
+}
+
+function save(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+// ---- Init ----
+function todayStr() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+document.getElementById('f-date').value = todayStr();
+
+// Pre-populate goal from last next_plan when project changes
+document.getElementById('f-project').addEventListener('change', prefillGoal);
+document.getElementById('f-project').addEventListener('input', prefillGoal);
+
+function prefillGoal() {
+  const project = document.getElementById('f-project').value.trim();
+  if (!project) return;
+  const entries = load();
+  // Find last entry for this project that has a next_plan
+  const match = [...entries]
+    .filter(e => e.project.toLowerCase() === project.toLowerCase() && e.next_plan && e.next_plan.trim())
+    .sort((a, b) => b.id - a.id)[0];
+
+  const goalField = document.getElementById('f-goal');
+  const hint = document.getElementById('carry-hint');
+
+  if (match && !goalField._userEdited) {
+    goalField.value = match.next_plan;
+    hint.style.display = 'block';
+  } else if (!match) {
+    if (!goalField._userEdited) goalField.value = '';
+    hint.style.display = 'none';
+  }
+}
+
+document.getElementById('f-goal').addEventListener('input', function() {
+  this._userEdited = true;
+  document.getElementById('carry-hint').style.display = 'none';
+});
+
+// Reset user-edited flag when project changes so carry-forward works again
+document.getElementById('f-project').addEventListener('change', function() {
+  document.getElementById('f-goal')._userEdited = false;
+});
+
+// ---- Add Entry ----
+function addEntry() {
+  const date    = document.getElementById('f-date').value.trim();
+  const project = document.getElementById('f-project').value.trim();
+  const goal    = document.getElementById('f-goal').value.trim();
+  const next    = document.getElementById('f-next').value.trim();
+
+  if (!date || !project || !goal) {
+    flash('Please fill in Date, Project, and Goal.'); return;
+  }
+
+  const entries = load();
+  const id = entries.length ? Math.max(...entries.map(e => e.id)) + 1 : 1;
+
+  entries.push({ id, date, project, goal, achieved: false, next_plan: next });
+  save(entries);
+
+  // Reset form
+  document.getElementById('f-goal').value = '';
+  document.getElementById('f-goal')._userEdited = false;
+  document.getElementById('f-next').value = '';
+  document.getElementById('carry-hint').style.display = 'none';
+  document.getElementById('f-date').value = todayStr();
+
+  renderTable();
+  updateProjectDropdowns();
+  flash('Session added.');
+}
+
+// ---- Toggle Achieved ----
+function toggleAchieved(id) {
+  const entries = load();
+  const e = entries.find(x => x.id === id);
+  if (e) { e.achieved = !e.achieved; save(entries); renderTable(); }
+}
+
+// ---- Save Next Plan inline ----
+function saveNextPlan(id, value) {
+  const entries = load();
+  const e = entries.find(x => x.id === id);
+  if (e) { e.next_plan = value.trim(); save(entries); }
+}
+
+// ---- Delete ----
+function deleteEntry(id) {
+  if (!confirm('Delete this session entry?')) return;
+  const entries = load().filter(e => e.id !== id);
+  save(entries);
+  renderTable();
+  updateProjectDropdowns();
+  flash('Entry deleted.');
+}
+
+// ---- Render Table ----
+function renderTable() {
+  const entries = load();
+  const filterProject = document.getElementById('filter-project').value;
+
+  const filtered = entries
+    .filter(e => !filterProject || e.project.toLowerCase() === filterProject.toLowerCase())
+    .sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id);
+
+  const tbody = document.getElementById('table-body');
+  const empty = document.getElementById('empty-state');
+  const summaryRow = document.getElementById('summary-row');
+  const statsBar = document.getElementById('stats-bar');
+
+  tbody.innerHTML = '';
+
+  if (filtered.length === 0) {
+    empty.style.display = 'block';
+    summaryRow.style.display = 'none';
+    statsBar.textContent = '';
+    return;
+  }
+
+  empty.style.display = 'none';
+
+  filtered.forEach(e => {
+    const tr = document.createElement('tr');
+
+    tr.innerHTML = `
+      <td class="td-date">${formatDate(e.date)}</td>
+      <td class="td-project"><span class="project-tag" title="${esc(e.project)}">${esc(e.project)}</span></td>
+      <td class="td-goal"><div class="text">${esc(e.goal)}</div></td>
+      <td class="td-next">
+        <input class="next-input" data-id="${e.id}" value="${esc(e.next_plan || '')}"
+          placeholder="Plan next…"
+          title="Next session plan — will pre-fill Goal for this project">
+      </td>
+      <td class="td-achieved">
+        <button class="toggle-btn ${e.achieved ? 'toggle-yes' : 'toggle-no'}"
+          onclick="toggleAchieved(${e.id})">
+          ${e.achieved ? 'YES' : 'NO'}
+        </button>
+      </td>
+      <td class="td-actions">
+        <button class="del-btn" onclick="deleteEntry(${e.id})" title="Delete entry">×</button>
+      </td>
+    `;
+
+    tbody.appendChild(tr);
+  });
+
+  // Attach next-plan blur handlers
+  tbody.querySelectorAll('.next-input').forEach(inp => {
+    inp.addEventListener('blur', function() {
+      saveNextPlan(parseInt(this.dataset.id), this.value);
+    });
+    inp.addEventListener('keydown', function(ev) {
+      if (ev.key === 'Enter') { ev.preventDefault(); this.blur(); }
+    });
+  });
+
+  // Summary
+  const total = filtered.length;
+  const done  = filtered.filter(e => e.achieved).length;
+  const pct   = total ? Math.round(done / total * 100) : 0;
+
+  summaryRow.style.display = 'flex';
+  summaryRow.innerHTML = `
+    <span><strong>${total}</strong> session${total !== 1 ? 's' : ''}</span>
+    <span><strong>${done}</strong> achieved</span>
+    <span><strong>${pct}%</strong> completion rate</span>
+  `;
+
+  statsBar.innerHTML = `<strong>${total}</strong> entries`;
+}
+
+// ---- Update project dropdowns ----
+function updateProjectDropdowns() {
+  const entries = load();
+  const projects = [...new Set(entries.map(e => e.project))].sort();
+
+  const filterSel = document.getElementById('filter-project');
+  const current = filterSel.value;
+  filterSel.innerHTML = '<option value="">All projects</option>';
+  projects.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p; opt.textContent = p;
+    if (p === current) opt.selected = true;
+    filterSel.appendChild(opt);
+  });
+
+  const datalist = document.getElementById('project-list');
+  datalist.innerHTML = '';
+  projects.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p;
+    datalist.appendChild(opt);
+  });
+}
+
+// ---- Export CSV ----
+function exportCSV() {
+  const entries = load()
+    .sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id);
+
+  if (!entries.length) { flash('No data to export.'); return; }
+
+  const header = ['ID', 'Date', 'Project', 'Goal', 'Achieved', 'Next Plan'];
+  const rows = entries.map(e => [
+    e.id,
+    e.date,
+    csvEsc(e.project),
+    csvEsc(e.goal),
+    e.achieved ? 'Yes' : 'No',
+    csvEsc(e.next_plan || '')
+  ]);
+
+  const csv = [header, ...rows].map(r => r.join(',')).join('\r\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `paper_tracker_${todayStr()}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  flash('CSV exported.');
+}
+
+// ---- Helpers ----
+function esc(str) {
+  return String(str || '')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+function csvEsc(str) {
+  str = String(str || '');
+  if (/[",\n\r]/.test(str)) return '"' + str.replace(/"/g, '""') + '"';
+  return str;
+}
+
+function formatDate(d) {
+  if (!d) return '';
+  const [y, m, day] = d.split('-');
+  return `${y}-${m}-${day}`;
+}
+
+function flash(msg) {
+  const el = document.getElementById('flash');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+// ---- Boot ----
+updateProjectDropdowns();
+renderTable();
+</script>
+</body>
+</html>
