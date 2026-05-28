@@ -29,7 +29,7 @@
     background: var(--bg);
     color: var(--text);
     font-family: var(--font-sans);
-    font-size: 14px;
+    font-size: 23px;
     line-height: 1.6;
     min-height: 100vh;
   }
@@ -51,14 +51,14 @@
 
   header h1 {
     font-family: var(--font-serif);
-    font-size: 22px;
+    font-size: 28px;
     font-weight: normal;
     color: var(--text);
     letter-spacing: 0.01em;
   }
 
   header .subtitle {
-    font-size: 12px;
+    font-size: 15px;
     color: var(--text-faint);
     letter-spacing: 0.04em;
     text-transform: uppercase;
@@ -84,7 +84,7 @@
   .panel-header {
     padding: 14px 18px;
     border-bottom: 1px solid var(--border-light);
-    font-size: 11px;
+    font-size: 23px;
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -103,7 +103,7 @@
 
   label {
     display: block;
-    font-size: 12px;
+    font-size: 15px;
     font-weight: 600;
     color: var(--text-muted);
     margin-bottom: 5px;
@@ -121,7 +121,7 @@
     background: var(--bg);
     color: var(--text);
     font-family: var(--font-sans);
-    font-size: 13px;
+    font-size: 20px;
     transition: border-color 0.15s;
     outline: none;
   }
@@ -138,7 +138,7 @@
   }
 
   .hint {
-    font-size: 11px;
+    font-size: 23px;
     color: var(--text-faint);
     margin-top: 4px;
   }
@@ -153,7 +153,7 @@
     background: var(--surface);
     color: var(--text);
     font-family: var(--font-sans);
-    font-size: 13px;
+    font-size: 20px;
     cursor: pointer;
     transition: background 0.12s, border-color 0.12s;
     white-space: nowrap;
@@ -190,11 +190,11 @@
 
   .toolbar select, .toolbar input {
     padding: 6px 10px;
-    font-size: 13px;
+    font-size: 20px;
   }
 
   .stats-bar {
-    font-size: 12px;
+    font-size: 15px;
     color: var(--text-faint);
     margin-left: auto;
     white-space: nowrap;
@@ -215,14 +215,14 @@
   table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 13px;
+    font-size: 20px;
   }
 
   thead th {
     background: #f5f4f0;
     padding: 9px 12px;
     text-align: left;
-    font-size: 11px;
+    font-size: 23px;
     font-weight: 600;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -247,7 +247,7 @@
   .td-date {
     white-space: nowrap;
     color: var(--text-muted);
-    font-size: 12px;
+    font-size: 15px;
     font-variant-numeric: tabular-nums;
     width: 90px;
   }
@@ -263,7 +263,7 @@
     background: var(--accent-light);
     color: var(--accent);
     border-radius: 2px;
-    font-size: 11px;
+    font-size: 23px;
     font-weight: 600;
     letter-spacing: 0.02em;
     max-width: 120px;
@@ -277,7 +277,7 @@
 
   .td-next {
     color: var(--text-muted);
-    font-size: 12px;
+    font-size: 15px;
     font-style: italic;
     width: 160px;
   }
@@ -289,7 +289,7 @@
     border-radius: 2px;
     background: transparent;
     color: var(--text-muted);
-    font-size: 12px;
+    font-size: 15px;
     font-style: italic;
     font-family: var(--font-sans);
     transition: border-color 0.12s, background 0.12s;
@@ -314,7 +314,7 @@
     padding: 4px 10px;
     border-radius: 12px;
     border: 1px solid;
-    font-size: 12px;
+    font-size: 15px;
     font-weight: 700;
     letter-spacing: 0.04em;
     cursor: pointer;
@@ -344,7 +344,7 @@
     border: none;
     cursor: pointer;
     color: var(--text-faint);
-    font-size: 16px;
+    font-size: 20px;
     line-height: 1;
     padding: 2px 4px;
     border-radius: 2px;
@@ -361,14 +361,14 @@
   }
 
   .empty-state p { margin-bottom: 6px; }
-  .empty-state small { font-size: 12px; }
+  .empty-state small { font-size: 15px; }
 
   /* ---- SUMMARY ROW ---- */
   .summary-row {
     background: #f5f4f0;
     border-top: 1px solid var(--border);
     padding: 8px 12px;
-    font-size: 12px;
+    font-size: 15px;
     color: var(--text-muted);
     display: flex;
     gap: 20px;
@@ -385,7 +385,7 @@
     color: #fff;
     padding: 10px 16px;
     border-radius: 4px;
-    font-size: 13px;
+    font-size: 20px;
     opacity: 0;
     transform: translateY(8px);
     transition: opacity 0.2s, transform 0.2s;
@@ -394,6 +394,145 @@
   }
 
   .flash.show { opacity: 1; transform: translateY(0); }
+
+  .yn-group {
+    display: flex;
+    gap: 10px;
+  }
+
+  .yn-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-size: 20px;
+    font-weight: normal;
+    color: var(--text);
+    letter-spacing: 0;
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    background: var(--bg);
+    transition: background 0.12s, border-color 0.12s;
+  }
+
+  .yn-label:has(input:checked) { border-color: var(--accent); background: var(--accent-light); }
+
+  .yn-label input[type="radio"] { accent-color: var(--accent); }
+
+  .yn-yes { color: var(--yes); font-weight: 700; }
+  .yn-no  { color: var(--no);  font-weight: 700; }
+
+  /* ---- CALENDAR ---- */
+  .cal-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+
+  .cal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    background: #f5f4f0;
+    border-bottom: 1px solid var(--border-light);
+  }
+
+  .cal-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: 0.02em;
+  }
+
+  .cal-nav {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    width: 26px;
+    height: 26px;
+    cursor: pointer;
+    font-size: 23px;
+    line-height: 1;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.12s;
+  }
+
+  .cal-nav:hover { background: var(--border-light); }
+
+  .cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 3px;
+    padding: 12px;
+  }
+
+  .cal-dow {
+    text-align: center;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--text-faint);
+    text-transform: uppercase;
+    padding: 4px 0 6px;
+  }
+
+  .cal-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    border-radius: 50%;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+    position: relative;
+  }
+
+  .cal-day.has-entry {
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .cal-day.day-yes  { background: var(--yes-bg);  color: var(--yes); }
+  .cal-day.day-no   { background: var(--no-bg);   color: var(--no);  }
+  .cal-day.day-mixed { background: #fef3e2; color: #8a5c00; }
+
+  .cal-day.day-today {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+  }
+
+  .cal-day.cal-empty { opacity: 0; pointer-events: none; }
+
+  .cal-legend {
+    display: flex;
+    gap: 16px;
+    padding: 8px 14px;
+    border-top: 1px solid var(--border-light);
+    font-size: 23px;
+    color: var(--text-muted);
+  }
+
+  .legend-item { display: flex; align-items: center; gap: 5px; }
+
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+  }
+
+  .dot-yes   { background: var(--yes-bg);  border: 1px solid #a8d5bb; }
+  .dot-no    { background: var(--no-bg);   border: 1px solid #d5b4b4; }
+  .dot-mixed { background: #fef3e2; border: 1px solid #f0c878; }
 
   @media (max-width: 700px) {
     .main { grid-template-columns: 1fr; }
@@ -421,7 +560,7 @@
           <input type="date" id="f-date">
         </div>
         <div class="field">
-          <label for="f-project">Project / Manuscript</label>
+          <label for="f-project">Project Name</label>
           <input type="text" id="f-project" placeholder="e.g. Nature Methods paper" list="project-list" autocomplete="off">
           <datalist id="project-list"></datalist>
         </div>
@@ -429,6 +568,17 @@
           <label for="f-goal">Today's Goal</label>
           <textarea id="f-goal" rows="3" placeholder="What will you write or revise today?"></textarea>
           <div class="hint" id="carry-hint" style="display:none">↑ Carried from last session's next plan</div>
+        </div>
+        <div class="field">
+          <label>달성 여부</label>
+          <div class="yn-group">
+            <label class="yn-label">
+              <input type="radio" name="f-achieved" value="Y"> <span class="yn-yes">Y</span>
+            </label>
+            <label class="yn-label">
+              <input type="radio" name="f-achieved" value="N" checked> <span class="yn-no">N</span>
+            </label>
+          </div>
         </div>
         <div class="field" style="margin-bottom:18px">
           <label for="f-next">Next Session Plan <span style="font-weight:400;color:var(--text-faint)">(optional)</span></label>
@@ -441,6 +591,22 @@
 
   <!-- RIGHT: Records -->
   <section class="records-panel">
+
+    <!-- Calendar -->
+    <div class="cal-panel">
+      <div class="cal-header">
+        <button class="cal-nav" onclick="calMove(-1)">&#8249;</button>
+        <span class="cal-title" id="cal-title"></span>
+        <button class="cal-nav" onclick="calMove(1)">&#8250;</button>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+      <div class="cal-legend">
+        <span class="legend-item"><span class="legend-dot dot-yes"></span>All achieved</span>
+        <span class="legend-item"><span class="legend-dot dot-no"></span>Not achieved</span>
+        <span class="legend-item"><span class="legend-dot dot-mixed"></span>Partial</span>
+      </div>
+    </div>
+
     <div class="toolbar">
       <div class="filter-wrap">
         <select id="filter-project" onchange="renderTable()">
@@ -534,10 +700,11 @@ document.getElementById('f-project').addEventListener('change', function() {
 
 // ---- Add Entry ----
 function addEntry() {
-  const date    = document.getElementById('f-date').value.trim();
-  const project = document.getElementById('f-project').value.trim();
-  const goal    = document.getElementById('f-goal').value.trim();
-  const next    = document.getElementById('f-next').value.trim();
+  const date     = document.getElementById('f-date').value.trim();
+  const project  = document.getElementById('f-project').value.trim();
+  const goal     = document.getElementById('f-goal').value.trim();
+  const next     = document.getElementById('f-next').value.trim();
+  const achieved = document.querySelector('input[name="f-achieved"]:checked')?.value === 'Y';
 
   if (!date || !project || !goal) {
     flash('Please fill in Date, Project, and Goal.'); return;
@@ -546,7 +713,7 @@ function addEntry() {
   const entries = load();
   const id = entries.length ? Math.max(...entries.map(e => e.id)) + 1 : 1;
 
-  entries.push({ id, date, project, goal, achieved: false, next_plan: next });
+  entries.push({ id, date, project, goal, achieved, next_plan: next });
   save(entries);
 
   // Reset form
@@ -555,6 +722,7 @@ function addEntry() {
   document.getElementById('f-next').value = '';
   document.getElementById('carry-hint').style.display = 'none';
   document.getElementById('f-date').value = todayStr();
+  document.querySelector('input[name="f-achieved"][value="N"]').checked = true;
 
   renderTable();
   updateProjectDropdowns();
@@ -659,6 +827,7 @@ function renderTable() {
   `;
 
   statsBar.innerHTML = `<strong>${total}</strong> entries`;
+  renderCalendar();
 }
 
 // ---- Update project dropdowns ----
@@ -741,9 +910,83 @@ function flash(msg) {
   setTimeout(() => el.classList.remove('show'), 2200);
 }
 
+// ---- Calendar ----
+let calYear  = new Date().getFullYear();
+let calMonth = new Date().getMonth();
+
+function calMove(dir) {
+  calMonth += dir;
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  if (calMonth < 0)  { calMonth = 11; calYear--; }
+  renderCalendar();
+}
+
+function renderCalendar() {
+  const entries = load();
+  const filterProject = document.getElementById('filter-project').value;
+  const src = filterProject
+    ? entries.filter(e => e.project.toLowerCase() === filterProject.toLowerCase())
+    : entries;
+
+  // date → { total, achieved }
+  const dateMap = {};
+  src.forEach(e => {
+    if (!dateMap[e.date]) dateMap[e.date] = { total: 0, achieved: 0 };
+    dateMap[e.date].total++;
+    if (e.achieved) dateMap[e.date].achieved++;
+  });
+
+  const MONTHS = ['January','February','March','April','May','June',
+                  'July','August','September','October','November','December'];
+  document.getElementById('cal-title').textContent = `${MONTHS[calMonth]} ${calYear}`;
+
+  const grid = document.getElementById('cal-grid');
+  grid.innerHTML = '';
+
+  // Day-of-week headers
+  ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(d => {
+    const el = document.createElement('div');
+    el.className = 'cal-dow';
+    el.textContent = d;
+    grid.appendChild(el);
+  });
+
+  const firstDow   = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  const today      = todayStr();
+
+  // Leading empty cells
+  for (let i = 0; i < firstDow; i++) {
+    const el = document.createElement('div');
+    el.className = 'cal-day cal-empty';
+    grid.appendChild(el);
+  }
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${calYear}-${String(calMonth + 1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const el = document.createElement('div');
+    el.className = 'cal-day';
+    el.textContent = d;
+
+    if (dateStr === today) el.classList.add('day-today');
+
+    const info = dateMap[dateStr];
+    if (info) {
+      el.classList.add('has-entry');
+      if (info.achieved === info.total)  el.classList.add('day-yes');
+      else if (info.achieved === 0)       el.classList.add('day-no');
+      else                                el.classList.add('day-mixed');
+      el.title = `${info.achieved}/${info.total} achieved`;
+    }
+
+    grid.appendChild(el);
+  }
+}
+
 // ---- Boot ----
 updateProjectDropdowns();
 renderTable();
+renderCalendar();
 </script>
 </body>
 </html>
