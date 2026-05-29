@@ -337,7 +337,22 @@
   .toggle-yes:hover { background: #d4eddf; }
   .toggle-no:hover { background: #eddbd4; }
 
-  .td-actions { width: 36px; text-align: center; }
+  .td-actions { width: 64px; text-align: center; white-space: nowrap; }
+
+  .edit-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-faint);
+    font-size: 18px;
+    line-height: 1;
+    padding: 2px 4px;
+    border-radius: 2px;
+    transition: color 0.12s, background 0.12s;
+    display: inline-block;
+  }
+
+  .edit-btn:hover { color: var(--accent); background: var(--accent-light); }
 
   .del-btn {
     background: none;
@@ -534,6 +549,66 @@
   .dot-no    { background: var(--no-bg);   border: 1px solid #d5b4b4; }
   .dot-mixed { background: #fef3e2; border: 1px solid #f0c878; }
 
+  /* ---- NOTES ---- */
+  .notes-section { margin-top: 5px; }
+  .notes-section.has-notes {
+    padding-top: 6px;
+    border-top: 1px dashed var(--border-light);
+  }
+  .note-item {
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+    font-size: 13px;
+    margin-bottom: 2px;
+    color: var(--text-muted);
+  }
+  .note-time {
+    font-variant-numeric: tabular-nums;
+    color: var(--text-faint);
+    font-size: 12px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .note-text { flex: 1; }
+  .note-del {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: transparent;
+    font-size: 14px;
+    padding: 0 2px;
+    transition: color 0.1s;
+    line-height: 1;
+  }
+  .note-item:hover .note-del { color: var(--text-faint); }
+  .note-del:hover { color: var(--no) !important; }
+  .add-note-row { display: flex; gap: 4px; margin-top: 5px; }
+  .note-input {
+    flex: 1;
+    padding: 3px 7px;
+    border: 1px solid var(--border-light);
+    border-radius: 2px;
+    background: transparent;
+    font-size: 13px;
+    color: var(--text);
+    font-family: var(--font-sans);
+    outline: none;
+    transition: border-color 0.12s, background 0.12s;
+  }
+  .note-input:hover { border-color: var(--border); background: var(--bg); }
+  .note-input:focus { border-color: var(--accent); background: #fff; }
+  .note-add-btn { padding: 3px 10px; font-size: 13px; white-space: nowrap; }
+
+  /* ---- EDIT MODE ---- */
+  .panel-header.edit-mode {
+    background: var(--accent-light);
+    color: var(--accent);
+    border-bottom-color: #c5d9ec;
+  }
+  .form-actions { display: flex; gap: 8px; }
+  .form-actions .btn-primary { flex: 1; }
+
   @media (max-width: 700px) {
     .main { grid-template-columns: 1fr; }
   }
@@ -553,7 +628,7 @@
   <!-- LEFT: Add Entry Form -->
   <aside>
     <div class="panel">
-      <div class="panel-header">New Session</div>
+      <div class="panel-header" id="panel-header-text">New Session</div>
       <div class="panel-body">
         <div class="field">
           <label for="f-date">Date</label>
@@ -584,7 +659,11 @@
           <label for="f-next">Next Session Plan <span style="font-weight:400;color:var(--text-faint)">(optional)</span></label>
           <textarea id="f-next" rows="2" placeholder="What comes after today?"></textarea>
         </div>
-        <button class="btn btn-primary" onclick="addEntry()">Add Session Entry</button>
+        <input type="hidden" id="f-edit-id" value="">
+        <div class="form-actions">
+          <button class="btn btn-primary" id="form-submit-btn" onclick="submitEntry()">Add Session Entry</button>
+          <button class="btn" id="form-cancel-btn" style="display:none" onclick="cancelEdit()">Cancel</button>
+        </div>
       </div>
     </div>
   </aside>
@@ -668,6 +747,7 @@ document.getElementById('f-project').addEventListener('change', prefillGoal);
 document.getElementById('f-project').addEventListener('input', prefillGoal);
 
 function prefillGoal() {
+  if (document.getElementById('f-edit-id').value) return;
   const project = document.getElementById('f-project').value.trim();
   if (!project) return;
   const entries = load();
@@ -698,6 +778,12 @@ document.getElementById('f-project').addEventListener('change', function() {
   document.getElementById('f-goal')._userEdited = false;
 });
 
+// ---- Submit (Add or Update) ----
+function submitEntry() {
+  const editId = document.getElementById('f-edit-id').value;
+  if (editId) { updateEntry(parseInt(editId)); } else { addEntry(); }
+}
+
 // ---- Add Entry ----
 function addEntry() {
   const date     = document.getElementById('f-date').value.trim();
@@ -707,26 +793,86 @@ function addEntry() {
   const achieved = document.querySelector('input[name="f-achieved"]:checked')?.value === 'Y';
 
   if (!date || !project || !goal) {
-    flash('Please fill in Date, Project, and Goal.'); return;
+    flash('Date, Project, Goal을 입력해 주세요.'); return;
   }
 
   const entries = load();
   const id = entries.length ? Math.max(...entries.map(e => e.id)) + 1 : 1;
-
-  entries.push({ id, date, project, goal, achieved, next_plan: next });
+  entries.push({ id, date, project, goal, achieved, next_plan: next, notes: [] });
   save(entries);
 
-  // Reset form
+  resetForm();
+  renderTable();
+  updateProjectDropdowns();
+  flash('세션이 추가되었습니다.');
+}
+
+// ---- Update Entry ----
+function updateEntry(id) {
+  const date     = document.getElementById('f-date').value.trim();
+  const project  = document.getElementById('f-project').value.trim();
+  const goal     = document.getElementById('f-goal').value.trim();
+  const next     = document.getElementById('f-next').value.trim();
+  const achieved = document.querySelector('input[name="f-achieved"]:checked')?.value === 'Y';
+
+  if (!date || !project || !goal) {
+    flash('Date, Project, Goal을 입력해 주세요.'); return;
+  }
+
+  const entries = load();
+  const e = entries.find(x => x.id === id);
+  if (e) {
+    e.date = date; e.project = project; e.goal = goal;
+    e.achieved = achieved; e.next_plan = next;
+    save(entries);
+  }
+  resetForm();
+  renderTable();
+  updateProjectDropdowns();
+  flash('항목이 수정되었습니다.');
+}
+
+// ---- Edit Entry (load into form) ----
+function editEntry(id) {
+  const entries = load();
+  const e = entries.find(x => x.id === id);
+  if (!e) return;
+
+  document.getElementById('f-date').value = e.date;
+  document.getElementById('f-project').value = e.project;
+  document.getElementById('f-goal').value = e.goal;
+  document.getElementById('f-goal')._userEdited = true;
+  document.getElementById('f-next').value = e.next_plan || '';
+  document.getElementById('carry-hint').style.display = 'none';
+  document.querySelector(`input[name="f-achieved"][value="${e.achieved ? 'Y' : 'N'}"]`).checked = true;
+  document.getElementById('f-edit-id').value = id;
+
+  const hdr = document.getElementById('panel-header-text');
+  hdr.textContent = 'Edit Session';
+  hdr.classList.add('edit-mode');
+  document.getElementById('form-submit-btn').textContent = 'Update Entry';
+  document.getElementById('form-cancel-btn').style.display = 'inline-flex';
+  document.querySelector('aside').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ---- Cancel Edit / Reset Form ----
+function cancelEdit() { resetForm(); }
+
+function resetForm() {
+  document.getElementById('f-edit-id').value = '';
+  document.getElementById('f-date').value = todayStr();
+  document.getElementById('f-project').value = '';
   document.getElementById('f-goal').value = '';
   document.getElementById('f-goal')._userEdited = false;
   document.getElementById('f-next').value = '';
   document.getElementById('carry-hint').style.display = 'none';
-  document.getElementById('f-date').value = todayStr();
   document.querySelector('input[name="f-achieved"][value="N"]').checked = true;
 
-  renderTable();
-  updateProjectDropdowns();
-  flash('Session added.');
+  const hdr = document.getElementById('panel-header-text');
+  hdr.textContent = 'New Session';
+  hdr.classList.remove('edit-mode');
+  document.getElementById('form-submit-btn').textContent = 'Add Session Entry';
+  document.getElementById('form-cancel-btn').style.display = 'none';
 }
 
 // ---- Toggle Achieved ----
@@ -743,14 +889,67 @@ function saveNextPlan(id, value) {
   if (e) { e.next_plan = value.trim(); save(entries); }
 }
 
-// ---- Delete ----
+// ---- Delete Entry ----
 function deleteEntry(id) {
-  if (!confirm('Delete this session entry?')) return;
+  if (!confirm('이 세션을 삭제할까요?')) return;
   const entries = load().filter(e => e.id !== id);
   save(entries);
   renderTable();
   updateProjectDropdowns();
-  flash('Entry deleted.');
+  flash('항목이 삭제되었습니다.');
+}
+
+// ---- Notes ----
+function addNote(id) {
+  const input = document.getElementById(`note-input-${id}`);
+  const text = input.value.trim();
+  if (!text) { input.focus(); return; }
+
+  const entries = load();
+  const e = entries.find(x => x.id === id);
+  if (!e) return;
+
+  if (!e.notes) e.notes = [];
+  const now = new Date();
+  const time = now.toTimeString().slice(0, 5);
+  const noteId = e.notes.length ? Math.max(...e.notes.map(n => n.id)) + 1 : 1;
+  e.notes.push({ id: noteId, time, text });
+  save(entries);
+  input.value = '';
+  renderTable();
+  const newInput = document.getElementById(`note-input-${id}`);
+  if (newInput) newInput.focus();
+}
+
+function deleteNote(entryId, noteId) {
+  const entries = load();
+  const e = entries.find(x => x.id === entryId);
+  if (e && e.notes) {
+    e.notes = e.notes.filter(n => n.id !== noteId);
+    save(entries);
+    renderTable();
+  }
+}
+
+function renderNotesHTML(entryId, notes) {
+  const notesList = notes.map(n => `
+    <div class="note-item">
+      <span class="note-time">${esc(n.time)}</span>
+      <span class="note-text">${esc(n.text)}</span>
+      <button class="note-del" onclick="deleteNote(${entryId},${n.id})" title="삭제">×</button>
+    </div>
+  `).join('');
+
+  return `
+    <div class="notes-section${notes.length ? ' has-notes' : ''}">
+      ${notesList}
+      <div class="add-note-row">
+        <input class="note-input" id="note-input-${entryId}" placeholder="작업 내용 추가…"
+          onkeydown="if(event.key==='Enter'){event.preventDefault();addNote(${entryId})}">
+        <button class="btn note-add-btn" onclick="addNote(${entryId})">추가</button>
+      </div>
+    </div>
+  `;
 }
 
 // ---- Render Table ----
@@ -784,7 +983,10 @@ function renderTable() {
     tr.innerHTML = `
       <td class="td-date">${formatDate(e.date)}</td>
       <td class="td-project"><span class="project-tag" title="${esc(e.project)}">${esc(e.project)}</span></td>
-      <td class="td-goal"><div class="text">${esc(e.goal)}</div></td>
+      <td class="td-goal">
+        <div class="text">${esc(e.goal)}</div>
+        ${renderNotesHTML(e.id, e.notes || [])}
+      </td>
       <td class="td-next">
         <input class="next-input" data-id="${e.id}" value="${esc(e.next_plan || '')}"
           placeholder="Plan next…"
@@ -797,6 +999,7 @@ function renderTable() {
         </button>
       </td>
       <td class="td-actions">
+        <button class="edit-btn" onclick="editEntry(${e.id})" title="Edit entry">✎</button>
         <button class="del-btn" onclick="deleteEntry(${e.id})" title="Delete entry">×</button>
       </td>
     `;
@@ -859,16 +1062,17 @@ function exportCSV() {
   const entries = load()
     .sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id);
 
-  if (!entries.length) { flash('No data to export.'); return; }
+  if (!entries.length) { flash('내보낼 데이터가 없습니다.'); return; }
 
-  const header = ['ID', 'Date', 'Project', 'Goal', 'Achieved', 'Next Plan'];
+  const header = ['ID', 'Date', 'Project', 'Goal', 'Achieved', 'Next Plan', 'Notes'];
   const rows = entries.map(e => [
     e.id,
     e.date,
     csvEsc(e.project),
     csvEsc(e.goal),
     e.achieved ? 'Yes' : 'No',
-    csvEsc(e.next_plan || '')
+    csvEsc(e.next_plan || ''),
+    csvEsc((e.notes || []).map(n => `[${n.time}] ${n.text}`).join(' | '))
   ]);
 
   const csv = [header, ...rows].map(r => r.join(',')).join('\r\n');
