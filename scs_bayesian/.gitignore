@@ -1,0 +1,10 @@
+# Never publish patient-level data or model outputs
+data/
+outputs/
+*.rds
+*_draws.csv
+*_predictions.csv
+*.exe
+.Rhistory
+.RData
+
